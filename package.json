@@ -1,0 +1,70 @@
+{
+  "name": "next.js",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:ext": "plasmo dev",
+    "build": "next build",
+    "build:ext": "plasmo build",
+    "lint": "eslint",
+    "package": "plasmo build && powershell Compress-Archive -Force -Path build/chrome-mv3-prod/* -DestinationPath extension.zip",
+    "generate:api": "npx openapi-typescript http://localhost:8080/docs/openapi3.json -o ./src/types/api.ts"
+  },
+  "manifest": {
+    "name": "FDY Write",
+    "version": "1.0.0",
+    "description": "Secure, encrypted workspace popup",
+    "permissions": [
+      "storage",
+      "cookies"
+    ],
+    "host_permissions": [
+      "https://api.fdy.co.kr/*"
+    ],
+    "content_security_policy": {
+      "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    }
+  },
+  "plasmo": {
+    "externals": [
+      "node:fs",
+      "node:module",
+      "node:path",
+      "node:os",
+      "node:util",
+      "node:process",
+      "node:crypto"
+    ]
+  },
+  "dependencies": {
+    "@plasmohq/messaging": "^0.7.2",
+    "@plasmohq/storage": "^1.15.0",
+    "axios": "^1.13.6",
+    "hash-wasm": "^4.12.0",
+    "jspdf": "^4.2.0",
+    "lucide-react": "^0.577.0",
+    "next": "16.1.6",
+    "openapi-fetch": "^0.17.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@types/argon2-browser": "^1.18.4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "openapi-typescript": "^7.13.0",
+    "plasmo": "latest",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5"
+  },
+  "overrides": {
+    "jiti": "1.21.0"
+  }
+}

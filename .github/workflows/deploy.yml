@@ -1,0 +1,68 @@
+name: Next.js Web Deploy to NHN Cloud
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+env:
+  NHN_OBJ_USER_ACCESS_KEY: ${{ secrets.NHN_OBJ_USER_ACCESS_KEY }}
+  NHN_OBJ_SECRET_ACCESS_KEY: ${{ secrets.NHN_OBJ_SECRET_ACCESS_KEY }}
+  
+  NHN_BUCKET_NAME: ${{ secrets.NHN_BUCKET_NAME }}
+  NHN_ENDPOINT_URL: ${{ secrets.NHN_ENDPOINT_URL }}
+
+  NHN_CDN_APP_KEY: ${{ secrets.NHN_CDN_APP_KEY }}
+  NHN_CDN_SECRETKEY: ${{ secrets.NHN_CDN_SECRETKEY }}
+  NHN_CDN_FDY_DOMAIN: ${{ secrets.NHN_CDN_FDY_DOMAIN }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build Next.js
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.fdy.co.kr
+
+      - name: Upload to NHN Cloud Object Storage
+        run: |
+          aws configure set aws_access_key_id ${{ env.NHN_OBJ_USER_ACCESS_KEY }}
+          aws configure set aws_secret_access_key ${{ env.NHN_OBJ_SECRET_ACCESS_KEY }}
+          
+          aws configure set request_checksum_calculation when_required
+          aws configure set response_checksum_validation when_required
+
+          aws s3 sync ./out s3://${{ env.NHN_BUCKET_NAME }} \
+            --endpoint-url ${{ env.NHN_ENDPOINT_URL }} \
+            --delete
+
+      - name: Purge NHN Cloud CDN Cache
+        run: |
+          RESPONSE=$(curl -s -X POST "https://kr1-cdn.api.nhncloudservice.com/v2.0/appKeys/${{ env.NHN_CDN_APP_KEY }}/purge/all" \
+            -H "Authorization: ${{ env.NHN_CDN_SECRETKEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"domain\": \"${{ env.NHN_CDN_FDY_DOMAIN }}\"}")
+          
+          echo "CDN Purge Response: $RESPONSE"
+          
+          # 성공 여부 확인
+          IS_SUCCESS=$(echo $RESPONSE | python3 -c "import sys,json; print(json.load(sys.stdin)['header']['isSuccessful'])")
+          if [ "$IS_SUCCESS" != "True" ]; then
+            echo "CDN Purge failed!"
+            exit 1
+          fi
