@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🛡️ FDY: End-to-End Encrypted Private Document Web
 
-## Getting Started
+안녕하세요! FDY의 보안 안내원입니다. 여러분의 소중한 아이디어와 개인적인 기록들이 어떻게 안전하게 보호되는지 안내해 드리겠습니다. FDY는 **'그 누구도, 심지어 서버 운영자조차도 당신의 문서를 읽을 수 없다'**는 원칙하에 설계되었습니다.
 
-First, run the development server:
+---
+
+## 🔒 보안 핵심 원칙 (Security Principles)
+
+1.  **종단간 암호화 (E2EE)**: 모든 데이터는 브라우저에서 나가는 순간 이미 암호화되어 있습니다.
+2.  **영지식 아키텍처 (Zero-Knowledge)**: 서버는 사용자의 비밀번호나 암호화 키를 절대 알 수 없습니다.
+3.  **강력한 표준 알고리즘**: 학계와 업계에서 검증된 최신 암호화 알고리즘만을 사용합니다.
+
+---
+
+## 🏗️ 보안 흐름도 (Security Flow)
+
+FDY의 보안은 다음과 같은 정교한 과정을 거쳐 완성됩니다.
+
+### 1. 열쇠 제작 (Key Generation)
+- **DEK (Data Encryption Key)**: 사용자의 문서를 암호화하는 실제 열쇠입니다. 브라우저 내에서 무작위로 생성되며, 256비트 AES-GCM 보안을 제공합니다.
+- **KEK (Key Encryption Key)**: 열쇠를 보관하는 금고 열쇠입니다. 사용자의 비밀번호로부터 유도됩니다.
+
+### 2. 강력한 키 유도 (Key Derivation - Argon2id)
+단순한 해시가 아닙니다. FDY는 최신 GPU 공격에도 강력한 **Argon2id** 알고리즘을 사용하여 사용자의 비밀번호를 보호합니다.
+- **AuthHash**: 서버 로그인용 해시 (서버는 이 값만 알 수 있습니다).
+- **Encryption KEK**: 브라우저 내부에서 DEK를 암호화/복호화하기 위한 열쇠.
+
+### 3. 이중 잠금 장치 (Double Encryption)
+1.  사용자의 **문서**는 무작위 **DEK**로 암호화됩니다.
+2.  사용된 **DEK**는 사용자의 비밀번호로 만든 **KEK**로 다시 한번 암호화됩니다.
+3.  서버에는 **'암호화된 문서'**와 **'암호화된 DEK'**만 저장됩니다.
+
+---
+
+## 🛡️ 왜 FDY는 안전한가요?
+
+### 🚫 서버는 당신의 비밀번호를 모릅니다.
+서버로 전송되는 것은 비밀번호 자체가 아니라, 복잡한 연산을 거친 `AuthHash`뿐입니다. 설령 서버 데이터베이스가 통째로 유출되더라도 공격자는 여러분의 실제 비밀번호를 알아낼 수 없습니다.
+
+### 🚫 서버는 당신의 문서를 읽을 수 없습니다.
+서버에 저장된 문서는 암호화되어 있으며, 이를 풀 수 있는 열쇠(DEK) 또한 암호화되어 있습니다. 이 열쇠를 풀 수 있는 유일한 방법은 오직 사용자의 **머릿속에만 있는 비밀번호**를 입력하는 것뿐입니다.
+
+### 🛠️ 검증된 기술 스택
+- **AES-GCM 256-bit**: 군사 수준의 암호화 표준.
+- **Argon2id**: PHC(Password Hashing Competition) 우승 알고리즘.
+- **Web Crypto API**: 브라우저 하드웨어 가속을 이용한 안전한 암호화 처리.
+
+---
+
+## 🚀 시작하기
+
+보안 안내원과 함께 안전한 기록의 세계로 떠나보세요.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+FDY는 여러분의 프라이버시를 최우선으로 생각합니다. 모든 코드는 투명하게 공개되어 있으며, 보안에 관한 피드백은 언제나 환영합니다.
