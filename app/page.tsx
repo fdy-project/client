@@ -9,22 +9,46 @@ import Link from 'next/link';
 
 // 인터랙티브 데모 컴포넌트 (체험 가능한 미니 Node)
 function InteractiveDemo() {
-    const [content, setContent] = useState(`<계정>\nmaster\nosdijfisdjfosdisdmidcmsodimciodcisdsdocmid\n\napplication\noiiodfvidofmoidmfomdfodmicmdiofmcdiofm`);
-    const [isEncrypted, setIsEncrypted] = useState(false);
-    const [displayText, setDisplayText] = useState(content);
+    const demoData = {
+        'db': {
+            title: 'DB 비밀번호',
+            content: `<계정>\nmaster\nosdijfisdjfosdisdmidcmsodimciodcisdsdocmid\n\napplication\noiiodfvidofmoidmfomdfodmicmdiofmcdiofm`
+        },
+        'bank': {
+            title: '계좌 비밀번호',
+            content: `국민은행 (123-45-67890)\n비밀번호: 4***\n\n신한은행 (987-65-43210)\n비밀번호: 9***`
+        },
+        'diary': {
+            title: '나만의 일기장',
+            content: `2026년 3월 20일\n오늘은 FDY 프로젝트의 랜딩 페이지를 작업했다.\n보안과 디자인의 조화를 찾는 과정이 즐겁다.\n내일은 더 멋진 기능을 추가해봐야지.`
+        }
+    };
 
-    const handleToggleEncryption = () => {
-        if (!isEncrypted) {
-            // 암호화 시뮬레이션 (랜덤 문자열로 변환)
-            const encrypted = content.split('').map(() => 
+    const [selectedId, setSelectedId] = useState<keyof typeof demoData>('db');
+    const [contents, setContents] = useState({
+        db: demoData.db.content,
+        bank: demoData.bank.content,
+        diary: demoData.diary.content,
+    });
+    const [isEncrypted, setIsEncrypted] = useState(false);
+    const [displayText, setDisplayText] = useState(contents[selectedId]);
+
+    useEffect(() => {
+        if (isEncrypted) {
+            const encrypted = contents[selectedId].split('').map(() => 
                 Math.random().toString(36).substring(2, 3)
             ).join('').substring(0, 150) + "... [AES-GCM-ENCRYPTED]";
             setDisplayText(encrypted);
         } else {
-            setDisplayText(content);
+            setDisplayText(contents[selectedId]);
         }
+    }, [selectedId, isEncrypted, contents]);
+
+    const handleToggleEncryption = () => {
         setIsEncrypted(!isEncrypted);
     };
+
+    const currentContent = contents[selectedId];
 
     return (
         <div className="w-full bg-white border border-[#e5e3dc] rounded-2xl overflow-hidden shadow-2xl flex flex-col h-[500px]">
@@ -41,17 +65,27 @@ function InteractiveDemo() {
 
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar Mockup */}
-                <div className="w-40 bg-[#fafaf8] border-r border-[#eeece6] hidden sm:flex flex-col p-4 shrink-0">
+                <div className="w-44 bg-[#fafaf8] border-r border-[#eeece6] hidden sm:flex flex-col p-4 shrink-0">
                     <div className="text-[12px] font-bold mb-6 flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-blue-600" /> Workspace
                     </div>
                     <div className="space-y-4">
-                        <div className="space-y-2">
-                            <div className="text-[12px] flex items-center gap-2 text-neutral-700 font-medium bg-neutral-200/50 p-1.5 rounded-md -ml-1">
-                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                DB 비밀번호
-                            </div>
-                            <div className="text-[12px] flex items-center gap-2 text-neutral-400 pl-1">
+                        <div className="space-y-1">
+                            {(Object.keys(demoData) as Array<keyof typeof demoData>).map((id) => (
+                                <button
+                                    key={id}
+                                    onClick={() => setSelectedId(id)}
+                                    className={`w-full text-left text-[12px] flex items-center gap-2 p-1.5 rounded-md transition-colors ${
+                                        selectedId === id 
+                                        ? 'text-neutral-700 font-medium bg-neutral-200/50' 
+                                        : 'text-neutral-500 hover:bg-neutral-100'
+                                    }`}
+                                >
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    {demoData[id].title}
+                                </button>
+                            ))}
+                            <div className="text-[12px] flex items-center gap-2 text-neutral-400 pl-1.5 pt-2">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
                                 프로젝트 A
                             </div>
@@ -62,7 +96,7 @@ function InteractiveDemo() {
                 {/* Editor Area */}
                 <div className="flex-1 flex flex-col bg-white relative">
                     <div className="h-12 border-b border-[#eeece6] flex items-center px-6 justify-between bg-white z-10">
-                        <div className="text-[13px] font-medium">DB 비밀번호</div>
+                        <div className="text-[13px] font-medium">{demoData[selectedId].title}</div>
                         <button 
                             onClick={handleToggleEncryption}
                             className={`text-[11px] font-bold px-3 py-1.5 rounded-full transition-all flex items-center gap-2 ${
@@ -93,10 +127,9 @@ function InteractiveDemo() {
                         ) : (
                             <textarea 
                                 className="w-full h-full outline-none resize-none leading-relaxed text-neutral-700 bg-transparent"
-                                value={content}
+                                value={currentContent}
                                 onChange={(e) => {
-                                    setContent(e.target.value);
-                                    setDisplayText(e.target.value);
+                                    setContents(prev => ({ ...prev, [selectedId]: e.target.value }));
                                 }}
                                 placeholder="여기에 비밀 내용을 입력해보세요..."
                             />
