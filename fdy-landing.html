@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDY — 종단간 암호화 문서 저장소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf8;
+    --bg2: #f4f3ef;
+    --white: #ffffff;
+    --border: #e5e3dc;
+    --border-soft: #eeece6;
+    --text: #2c2b28;
+    --text-2: #6b6960;
+    --text-3: #a09e96;
+    --accent: #2563eb;
+    --accent-light: #eff4ff;
+    --accent-mid: #bfcffc;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --green-mid: #bbf7d0;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --mono: 'Geist Mono', monospace;
+    --sans: 'Geist', 'Noto Sans KR', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 60px;
+    background: rgba(250,250,248,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 3px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-2);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.15s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-btn {
+    background: var(--text) !important;
+    color: var(--bg) !important;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.15s !important;
+  }
+
+  .nav-btn:hover { opacity: 0.8; }
+
+  /* HERO */
+  .hero-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 140px 48px 100px;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 72px;
+    align-items: center;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 28px;
+    font-family: var(--mono);
+    border: 1px solid var(--accent-mid);
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: bpulse 2s infinite;
+  }
+
+  @keyframes bpulse {
+    0%,100% { opacity:1; }
+    50% { opacity:0.35; }
+  }
+
+  .hero-title {
+    font-size: clamp(38px, 4.5vw, 56px);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .hero-title em { font-style: normal; color: var(--accent); }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--text-2);
+    line-height: 1.8;
+    font-weight: 300;
+    margin-bottom: 40px;
+    max-width: 480px;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-main {
+    background: var(--text);
+    color: var(--bg);
+    padding: 12px 26px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+
+  .btn-main:hover { opacity: 0.82; transform: translateY(-1px); }
+
+  .btn-ghost {
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-ghost:hover { color: var(--text); border-color: #c5c3bb; }
+
+  /* Hero card */
+  .hero-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05), 0 20px 60px rgba(0,0,0,0.07);
+  }
+
+  .card-bar {
+    background: var(--bg2);
+    padding: 11px 16px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .md { width: 10px; height: 10px; border-radius: 50%; }
+  .mr { background: #ff5f57; }
+  .my { background: #febc2e; }
+  .mg { background: #28c840; }
+
+  .card-url-bar {
+    flex: 1;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  .card-inner { padding: 24px; }
+
+  .card-breadcrumb {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .card-doc-title {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: 24px;
+  }
+
+  .card-field { margin-bottom: 14px; }
+
+  .card-field-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+    margin-bottom: 5px;
+  }
+
+  .card-field-val {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: transparent;
+    background-image: repeating-linear-gradient(
+      90deg,
+      var(--border) 0,
+      var(--border) 6px,
+      transparent 6px,
+      transparent 10px
+    );
+    background-size: 10px 2px;
+    background-position: center;
+    background-repeat: repeat-x;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+
+  .card-encrypted-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    background: var(--green-light);
+    color: var(--green);
+    border: 1px solid var(--green-mid);
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--mono);
+  }
+
+  /* TRUST BAR */
+  .trust-bar {
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-2);
+    font-family: var(--mono);
+  }
+
+  .trust-icon {
+    width: 20px; height: 20px;
+    background: var(--accent-light);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .trust-icon svg {
+    width: 11px; height: 11px;
+    stroke: var(--accent);
+  }
+
+  /* SHARED SECTION */
+  .section {
+    padding: 96px 48px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .sec-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+
+  .sec-title {
+    font-size: clamp(26px, 3vw, 38px);
+    font-weight: 600;
+    letter-spacing: -1px;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+
+  .sec-desc {
+    font-size: 15px;
+    color: var(--text-2);
+    line-height: 1.8;
+    font-weight: 300;
+    max-width: 500px;
+    margin-bottom: 48px;
+  }
+
+  /* SECURITY CARDS */
+  .sec-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .sc {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .sc:hover {
+    border-color: #c5c3bb;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+
+  .sc-chip {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+
+  .chip-b { background: var(--accent-light); color: var(--accent); }
+  .chip-g { background: var(--green-light); color: var(--green); }
+  .chip-a { background: var(--amber-light); color: var(--amber); }
+
+  .sc h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
+  }
+
+  .sc p {
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  .sc-tag {
+    display: inline-block;
+    margin-top: 20px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  .tag-b { background: var(--accent-light); color: var(--accent); }
+  .tag-g { background: var(--green-light); color: var(--green); }
+  .tag-a { background: var(--amber-light); color: var(--amber); }
+
+  /* FLOW BG */
+  .flow-bg {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 96px 48px;
+  }
+
+  .flow-inner { max-width: 1100px; margin: 0 auto; }
+
+  .key-table {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .key-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .key-table thead {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .key-table th {
+    padding: 13px 20px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 1px;
+    font-weight: 400;
+  }
+
+  .key-table td {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: top;
+    color: var(--text);
+  }
+
+  .key-table tr:last-child td { border-bottom: none; }
+
+  .kn { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); }
+  .kn-g { color: var(--green); }
+  .ks { font-family: var(--mono); font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+  .ybadge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--green-light); color: var(--green);
+    border-radius: 100px; padding: 4px 10px;
+    font-size: 11px; font-family: var(--mono);
+  }
+
+  .nbadge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #fef2f2; color: #dc2626;
+    border-radius: 100px; padding: 4px 10px;
+    font-size: 11px; font-family: var(--mono);
+  }
+
+  .flow-steps {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .fs {
+    padding: 30px 26px;
+    border-right: 1px solid var(--border-soft);
+  }
+
+  .fs:last-child { border-right: none; }
+
+  .fs-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .fs h3 { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
+  .fs p { font-size: 13px; color: var(--text-2); line-height: 1.7; font-weight: 300; }
+
+  .fa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    color: var(--text-3);
+    font-size: 14px;
+    border-right: 1px solid var(--border-soft);
+  }
+
+  .code-block {
+    background: #1a1a1a;
+    border-radius: 14px;
+    padding: 24px 28px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 2;
+    color: #cdd6f4;
+    overflow-x: auto;
+  }
+
+  .c-comment { color: #555; }
+  .c-key { color: #89dceb; }
+  .c-arr { color: #a6e3a1; }
+  .c-val { color: #f38ba8; }
+  .c-dim { color: #444; }
+
+  /* DEMO */
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  .steps-list { display: flex; flex-direction: column; }
+
+  .step-row {
+    display: flex;
+    gap: 16px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .step-row:last-child { border-bottom: none; }
+
+  .sn {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--accent-light);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .st h4 { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .st p { font-size: 13px; color: var(--text-2); line-height: 1.7; font-weight: 300; }
+
+  .ss-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+
+  .ss-bar {
+    background: var(--bg2);
+    padding: 11px 16px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ss-url {
+    flex: 1;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  .ss-placeholder {
+    width: 100%;
+    aspect-ratio: 4/3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--bg);
+    color: var(--text-3);
+    font-size: 13px;
+    font-family: var(--mono);
+    border: 2px dashed var(--border);
+  }
+
+  .ss-placeholder svg { width: 28px; height: 28px; opacity: 0.35; }
+
+  .ss-img { width: 100%; display: block; object-fit: cover; object-position: top; }
+
+  .ss-caption {
+    padding: 12px 18px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+    border-top: 1px solid var(--border-soft);
+    background: var(--bg2);
+  }
+
+  /* CTA */
+  .cta-wrap {
+    background: var(--text);
+    padding: 100px 48px;
+    text-align: center;
+  }
+
+  .cta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.5);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-family: var(--mono);
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 28px;
+  }
+
+  .cta-title {
+    font-size: clamp(28px, 3.5vw, 44px);
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -1.5px;
+    margin-bottom: 16px;
+    line-height: 1.15;
+  }
+
+  .cta-desc {
+    font-size: 15px;
+    color: rgba(255,255,255,0.45);
+    margin: 0 auto 40px;
+    max-width: 440px;
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  .btn-white {
+    background: #fff;
+    color: var(--text);
+    padding: 12px 26px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.15s;
+  }
+
+  .btn-white:hover { opacity: 0.88; }
+
+  .btn-outline-w {
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+
+  .btn-outline-w:hover { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.3); }
+
+  .cta-note {
+    margin-top: 28px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+  }
+
+  .cta-note a { color: rgba(255,255,255,0.35); text-decoration: underline; }
+
+  /* FOOTER */
+  footer {
+    padding: 22px 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg);
+  }
+
+  .footer-logo {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .footer-links { display: flex; gap: 24px; }
+
+  .footer-links a {
+    font-size: 13px;
+    color: var(--text-3);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .footer-links a:hover { color: var(--text-2); }
+
+  .footer-info { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+
+  /* REVEAL ANIMATION */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.on { opacity: 1; transform: translateY(0); }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { padding: 0 24px; }
+    .hero-wrap { grid-template-columns: 1fr; gap: 40px; padding: 100px 24px 60px; }
+    .section { padding: 64px 24px; }
+    .flow-bg { padding: 64px 24px; }
+    .sec-grid { grid-template-columns: 1fr; }
+    .flow-steps { grid-template-columns: 1fr; }
+    .fa { display: none; }
+    .demo-grid { grid-template-columns: 1fr; gap: 40px; }
+    .cta-wrap { padding: 64px 24px; }
+    footer { flex-direction: column; gap: 14px; text-align: center; }
+    .trust-bar { padding: 20px 24px; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><span class="logo-dot"></span> FDY</div>
+  <ul class="nav-links">
+    <li><a href="#security">보안 원칙</a></li>
+    <li><a href="#flow">동작 방식</a></li>
+    <li><a href="#demo">사용 방법</a></li>
+    <li><a href="/login" class="nav-btn">로그인 →</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero-wrap">
+  <div>
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      ZERO-KNOWLEDGE · E2E ENCRYPTED
+    </div>
+    <h1 class="hero-title">
+      당신만이 읽을 수<br>있는 <em>문서 저장소</em>
+    </h1>
+    <p class="hero-sub">
+      FDY는 서버 운영자를 포함해 누구도 저장된 내용을 열람할 수 없도록 설계된 개인 문서 웹입니다. 데이터는 브라우저를 떠나기 전에 이미 암호화됩니다.
+    </p>
+    <div class="hero-actions">
+      <a href="/login" class="btn-main">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        로그인 / 시작하기
+      </a>
+      <a href="#security" class="btn-ghost">보안 원칙 보기</a>
+    </div>
+  </div>
+
+  <div class="hero-card reveal">
+    <div class="card-bar">
+      <div class="md mr"></div>
+      <div class="md my"></div>
+      <div class="md mg"></div>
+      <div class="card-url-bar">fdy.app / workspace</div>
+    </div>
+    <div class="card-inner">
+      <div class="card-breadcrumb">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        dev / DB 비밀번호
+      </div>
+      <div class="card-doc-title">DB 비밀번호</div>
+      <div class="card-field">
+        <div class="card-field-label">master</div>
+        <div class="card-field-val"></div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">application</div>
+        <div class="card-field-val"></div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">developer</div>
+        <div class="card-field-val"></div>
+      </div>
+      <div class="card-encrypted-badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        AES-GCM으로 암호화됨
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item">
+    <div class="trust-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    AES-GCM 256-bit
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="10" ry="10"/><path d="M12 8v4l3 3"/></svg>
+    </div>
+    Argon2id (PHC winner)
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    Web Crypto API
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+    </div>
+    오픈소스 전체 공개
+  </div>
+</div>
+
+<!-- SECURITY -->
+<section class="section" id="security">
+  <div class="reveal">
+    <div class="sec-label">// 01</div>
+    <h2 class="sec-title">세 가지 보안 원칙</h2>
+    <p class="sec-desc">서버가 타협되더라도, DB가 유출되더라도 — 당신의 문서는 안전합니다.</p>
+  </div>
+  <div class="sec-grid reveal">
+    <div class="sc">
+      <div class="sc-chip chip-b">E2E</div>
+      <h3>종단간 암호화</h3>
+      <p>데이터는 브라우저를 떠나기 전에 암호화됩니다. 서버에는 암호문만 도달하며, 평문은 전송되지 않습니다.</p>
+      <span class="sc-tag tag-b">CLIENT-SIDE ONLY</span>
+    </div>
+    <div class="sc">
+      <div class="sc-chip chip-g">ZK</div>
+      <h3>영지식 설계</h3>
+      <p>서버는 비밀번호도, 암호화 키도 알지 못합니다. 인증에 사용되는 건 비밀번호에서 유도된 해시값뿐입니다.</p>
+      <span class="sc-tag tag-g">ZERO-KNOWLEDGE</span>
+    </div>
+    <div class="sc">
+      <div class="sc-chip chip-a">STD</div>
+      <h3>검증된 알고리즘</h3>
+      <p>AES-GCM, Argon2id 등 표준 암호화 스펙만 사용합니다. 검증되지 않은 독자적인 알고리즘은 사용하지 않습니다.</p>
+      <span class="sc-tag tag-a">PHC WINNER</span>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW -->
+<div class="flow-bg" id="flow">
+<div class="flow-inner">
+  <div class="reveal">
+    <div class="sec-label">// 02</div>
+    <h2 class="sec-title">암호화 동작 방식</h2>
+    <p class="sec-desc">비밀번호 하나에서 두 가지 키를 유도해 문서와 키를 이중으로 보호합니다.</p>
+  </div>
+
+  <div class="key-table reveal">
+    <table>
+      <thead>
+        <tr>
+          <th>키</th>
+          <th>역할</th>
+          <th>서버 인지 여부</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="kn">DEK</div><div class="ks">Data Encryption Key</div></td>
+          <td style="font-size:13px; color: var(--text-2); line-height:1.65;">문서를 직접 암호화하는 키. 브라우저에서 랜덤 생성됨.</td>
+          <td><span class="nbadge">✗ 불가</span></td>
+        </tr>
+        <tr>
+          <td><div class="kn">KEK</div><div class="ks">Key Encryption Key</div></td>
+          <td style="font-size:13px; color: var(--text-2); line-height:1.65;">DEK를 암호화하는 키. 사용자 비밀번호에서 Argon2id로 유도됨.</td>
+          <td><span class="nbadge">✗ 불가</span></td>
+        </tr>
+        <tr>
+          <td><div class="kn kn-g">AuthHash</div><div class="ks">Authentication Hash</div></td>
+          <td style="font-size:13px; color: var(--text-2); line-height:1.65;">서버 인증 전용. 비밀번호에서 유도되지만 KEK와 분리됨.</td>
+          <td><span class="ybadge">✓ 인지</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flow-steps reveal">
+    <div class="fs">
+      <div class="fs-num">01 · KEY DERIVATION</div>
+      <h3>비밀번호 → 두 개의 키</h3>
+      <p>Argon2id가 비밀번호 하나에서 KEK와 AuthHash를 분리 유도합니다. GPU 병렬 공격에 강한 메모리 집약적 알고리즘.</p>
+    </div>
+    <div class="fa">→</div>
+    <div class="fs">
+      <div class="fs-num">02 · DOUBLE ENCRYPTION</div>
+      <h3>문서 → DEK → KEK</h3>
+      <p>문서는 랜덤 DEK로 암호화되고, DEK는 다시 KEK로 암호화됩니다. 복호화 체인의 시작은 오직 사용자의 비밀번호.</p>
+    </div>
+    <div class="fa">→</div>
+    <div class="fs">
+      <div class="fs-num">03 · SERVER STORAGE</div>
+      <h3>암호문만 서버에</h3>
+      <p>서버에 저장되는 건 암호화된 문서와 암호화된 DEK뿐. DB가 통째로 유출돼도 내용 복호화는 불가능합니다.</p>
+    </div>
+  </div>
+
+  <div class="code-block reveal">
+<span class="c-comment">// 이중 암호화 흐름</span>
+
+<span class="c-key">비밀번호</span>  <span class="c-arr">──[Argon2id]──▶</span>  <span class="c-val">KEK</span>       <span class="c-dim"># 브라우저 안에만 존재</span>
+<span class="c-key">비밀번호</span>  <span class="c-arr">──[Argon2id]──▶</span>  <span class="c-val">AuthHash</span>  <span class="c-dim"># 서버로 전송되는 유일한 값</span>
+
+<span class="c-key">문서</span>      <span class="c-arr">──[DEK 암호화]──▶</span>  <span class="c-val">암호화된 문서</span>  <span class="c-arr">→</span> 서버 저장
+<span class="c-key">DEK</span>       <span class="c-arr">──[KEK 암호화]──▶</span>  <span class="c-val">암호화된 DEK</span>   <span class="c-arr">→</span> 서버 저장
+  </div>
+</div>
+</div>
+
+<!-- DEMO -->
+<section class="section" id="demo">
+  <div class="reveal">
+    <div class="sec-label">// 03</div>
+    <h2 class="sec-title">실제 사용 방법</h2>
+    <p class="sec-desc">일반 노트 앱처럼 사용하면 됩니다. 복잡한 암호화는 브라우저가 자동으로 처리합니다.</p>
+  </div>
+  <div class="demo-grid">
+    <div class="steps-list reveal">
+      <div class="step-row">
+        <div class="sn">01</div>
+        <div class="st">
+          <h4>계정 생성 및 비밀번호 설정</h4>
+          <p>비밀번호를 입력하면 브라우저가 자동으로 KEK와 AuthHash를 유도합니다. 비밀번호 자체는 서버에 전달되지 않습니다.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="sn">02</div>
+        <div class="st">
+          <h4>워크스페이스 구성</h4>
+          <p>폴더와 문서를 자유롭게 만듭니다. dev, prod 등 원하는 방식으로 분류하고 문서를 생성합니다.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="sn">03</div>
+        <div class="st">
+          <h4>문서 작성</h4>
+          <p>일반 노트처럼 작성합니다. 저장하는 순간 AES-GCM으로 자동 암호화되어 서버로 전송됩니다.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="sn">04</div>
+        <div class="st">
+          <h4>어디서나 안전하게 접근</h4>
+          <p>로그인하면 브라우저가 KEK를 재유도해 문서를 복호화합니다. 서버는 이 과정을 알 수 없습니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <div class="ss-wrap">
+        <div class="ss-bar">
+          <div class="md mr"></div>
+          <div class="md my"></div>
+          <div class="md mg"></div>
+          <div class="ss-url">fdy.app / workspace / DB 비밀번호</div>
+        </div>
+        <!--
+          스크린샷 교체 방법:
+          아래 ss-placeholder div를 제거하고 아래 img 태그를 추가하세요.
+          <img src="screenshot.png" class="ss-img" alt="FDY 실제 사용 화면">
+        -->
+        <div class="ss-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="m21 15-5-5L5 21"/>
+          </svg>
+          실제 사용 화면 스크린샷
+          <span style="font-size:11px;opacity:0.5">이미지를 교체해주세요</span>
+        </div>
+        <div class="ss-caption">↑ 암호화된 상태로 저장된 DB 비밀번호 문서 — 서버는 내용을 알 수 없습니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-wrap">
+  <div class="cta-badge">
+    <span class="badge-dot" style="background:rgba(255,255,255,0.4)"></span>
+    OPEN SOURCE · VERIFIABLE
+  </div>
+  <h2 class="cta-title reveal">지금 바로 시작하세요</h2>
+  <p class="cta-desc reveal">모든 코드는 공개되어 있습니다. 직접 검토하고, 배포하거나, 바로 사용해보세요.</p>
+  <div class="cta-btns reveal">
+    <a href="/login" class="btn-white">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      로그인 / 시작하기
+    </a>
+    <a href="https://github.com" class="btn-outline-w">GitHub →</a>
+  </div>
+  <p class="cta-note reveal">보안 이슈나 피드백은 <a href="#">PR 또는 Issue</a>로 남겨주세요</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><span class="logo-dot"></span> FDY</div>
+  <div class="footer-info">AES-GCM 256 · Argon2id · Web Crypto API</div>
+  <div class="footer-links">
+    <a href="#">GitHub</a>
+    <a href="#">보안 정책</a>
+    <a href="/login">로그인</a>
+  </div>
+</footer>
+
+<script>
+  const els = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('on'), i * 60);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  els.forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
